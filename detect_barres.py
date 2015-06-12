@@ -764,8 +764,8 @@ plt.show()
 
 #détection des notes
 
-pc_note = e0
-pc_blan = 2
+pc_note = 5*(e0-1)/4
+pc_blan = 3*e0
 pc_cro = e0
 
 #on enleve les barres ~horizontales possiblement restantes
@@ -791,13 +791,9 @@ plt.show()
 trace_verticales_liste(v6)
 v7 = existe_noire_img(img5,v6,e0)
 
-plt.imshow(img3)
-plt.show()
-
-#img3 sert à détecter les croches, img2 sert à détecter les blanches
+#cimg sert à détecter les croches, img2 sert à détecter les blanches
 v8 = existe_croche_blanche_mesure(cimg,img2,v7,e0)
-trace_verticales_liste(v6)
-v7 = existe_noire_img(img5,v6,e0)
+
 
 tracer_droite_liste(solprem,img1)
 tracer_droite_liste(solsec,img1)
@@ -806,4 +802,7 @@ tracer_droite_liste(solqua,img1)
 tracer_droite_liste(solcin,img1)
 
 plt.imshow(img3)
+plt.show()
+
+plt.imshow(img2)
 plt.show()
