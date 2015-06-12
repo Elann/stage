@@ -19,7 +19,7 @@ import cv2
 #----------------------------------------------------------
 # Importation de l'image
 
-img1 = cv2.imread('images/partition2.jpg',0)
+img0 = cv2.imread('images/partition5.jpg',0)
 
 # si problème avec la fonction qui grise :  as_grey=True (ne garantit pas des entiers)
 
@@ -29,7 +29,7 @@ img1 = cv2.imread('images/partition2.jpg',0)
 #longueur max d'un intervalle de noir représentant une portée
 seuil_portee = 2
 #sert au seuillage
-seuil_noir = 200 
+seuil_noir = 100 
 #marge autorisée pour les distances entre les lignes de la portée
 delta_portee = 2 
 #marge autorisée entre les ordonnées des points d'une même ligne de portée
@@ -37,13 +37,13 @@ delta_dist = 5
 #Nombre de pixels minimum qu'il doit y avoir entre deux barres verticales
 entre_bv = 3
 #pourcentage de remplissage du carré pour qu'on ait une note
-pc_note = 15
+#pc_note = e0
 #pourcentage de remplissage du carré pour qu'on ait une croche
-pc_cro = 45
+#pc_cro = 45
 #pourcentage de remplissage du carré pour qu'on ait une blanche
-pc_blan = 30
+#pc_blan = e0
 #Nombre maximal de croches sur une même note
-nbr_croches = 1
+nbr_croches = 2
 
 
 #----------------------------------------------------------
@@ -58,6 +58,14 @@ def img_0_1(img):
 			else:
 				img[x][y] = 0
 
+def imgbooltoint(img):
+	for x in range(img.shape[0]):
+		for y in range(img.shape[1]):
+			if img[x][y]:
+				img[x][y] = 1
+			else:
+				img[x][y] = 0
+				
 #cherche à détecter les morceaux noirs
 def trouve_noir(img,col):
 	memoire = 1
@@ -630,18 +638,15 @@ def existe_croche_blanche_mesure(img,img2,liste,ecart):
 # Programme
 
 #on passe en niveau de gris (marche seulement avec des .jpg)
-img1 = cv2.cvtColor(img1,cv2.COLOR_GRAY2BGR)
+img0 = cv2.cvtColor(img0,cv2.COLOR_GRAY2BGR)
 
-#événement magique qui garde les noires et les croches
-#cimg = cv2.medianBlur(img1,5)
 #on passe à un seul channel
-cimg = mh.colors.rgb2grey(cimg)
+img1 = mh.colors.rgb2grey(img0)
 
 #on supprime les composantes connexes de trop petite taille
-img12 = binary(img1)
+img12 = binary(img1,200)
 img1 = areaclose(img12,2000)
 
-#img22 = soustraction_img(img1,img2)
 plt.imshow(img1)
 plt.gray()
 plt.show()
@@ -745,48 +750,54 @@ trace_verticales_liste(v6)
 tracer_droite_hori_liste(tab2,img2)
 plt.imshow(img2)
 plt.show()
-	
+
+#événement magique qui garde les noires et les croches
+cimg = cv2.medianBlur(img0,5)
+#on passe à un seul channel
+cimg = mh.colors.rgb2grey(cimg)
+#on passe en binaire
+cimg = binary(cimg,100)
+imgbooltoint(cimg)
+
+plt.imshow(cimg)
+plt.show()
+
 #détection des notes
 
-#On retire les portées /!\ ici on le fait après le changement de repère (bonne idée ?)
-img11 = enleve_portees_liste(img1,solprem)
-img12 = enleve_portees_liste(img11,solsec)
-img13 = enleve_portees_liste(img12,solter)
-img14 = enleve_portees_liste(img13,solqua)
-img15 = enleve_portees_liste(img14,solcin)
+pc_note = e0
+pc_blan = 2
+pc_cro = e0
 
-plt.imshow(img15)
-plt.show()
+#on enleve les barres ~horizontales possiblement restantes
+b = 2*e0 #taille suivant les images !
+img52 = close(cimg,seline(b,90))
+img53 = close(cimg,seline(b,89))
+img54 = close(cimg,seline(b,88))
+img55 = close(cimg,seline(b,91))
+img56 = close(cimg,seline(b,92))
+img57 = close(cimg,seline(b,93))
+img58 = close(cimg,seline(b,87))
+img59 = close(cimg,seline(b,86))
+img60 = close(cimg,seline(b,94))
+img61 = close(cimg,seline(b,0))
+img62 = union(img52,img53,img54,img55,img56,img57,img58,img59,img60)
 
-#recolle les morceaux de notes
-img3 = open(img15,seline(3.5,0))
-plt.imshow(img3)
-plt.show()
-
-#partition5 : close/sedisk(6) /seline(20)
-#partition2 : close/sedisk(1) /seline(20)
-#partition8 : close/sedisk(1) /seline(20)
-
-#image ne contenant que (ou presque) les notes
-img51 = close(img3,sedisk(1))
-#on enleve les barres horizontales possiblement restantes
-b = 20
-img52 = close(img51,seline(b,90))
-img53 = close(img51,seline(b,89))
-img54 = close(img51,seline(b,88))
-img55 = close(img51,seline(b,91))
-img56 = close(img51,seline(b,92))
-img57 = union(img52,img53,img54,img55,img56)
-
-img5 = soustraction_img(img51,img57)
+img5 = soustraction_img(cimg,img62)
+img5 = soustraction_img(img5,img61)
 plt.imshow(img5)
 plt.show()
 
 #forme des listes [ordonnée1,ordonnée2,abscisse // noire en bas ?, noire en haut ? // nbr de croches // blanche en bas ?, blanche en haut ? // 'm']
 trace_verticales_liste(v6)
 v7 = existe_noire_img(img5,v6,e0)
+
+plt.imshow(img3)
+plt.show()
+
 #img3 sert à détecter les croches, img2 sert à détecter les blanches
-v8 = existe_croche_blanche_mesure(img3,img2,v7,e0)
+v8 = existe_croche_blanche_mesure(cimg,img2,v7,e0)
+trace_verticales_liste(v6)
+v7 = existe_noire_img(img5,v6,e0)
 
 tracer_droite_liste(solprem,img1)
 tracer_droite_liste(solsec,img1)
