@@ -14,12 +14,13 @@ import matplotlib.pyplot as plt2
 import scipy.ndimage as sc
 from math import *
 import cv2
+import sys
 
 
 #----------------------------------------------------------
 # Importation de l'image
 
-img0 = cv2.imread('images/partition5.jpg',0)
+img0 = cv2.imread('images/partition2.jpg',0)
 
 # si problème avec la fonction qui grise :  as_grey=True (ne garantit pas des entiers)
 
@@ -719,7 +720,11 @@ plt.gray()
 plt.show()
 
 moy = moyenne_pentes(tab)
-e0 = ecart_moyen(tab)
+try:
+	e0 = ecart_moyen(tab)
+except IndexError:
+	print "erreur lors de la détection des portées"
+	sys.exit(1)
 
 #PERTINENT ?
 #changement de repère
@@ -753,6 +758,8 @@ plt.show()
 
 #événement magique qui garde les noires et les croches
 cimg = cv2.medianBlur(img0,5)
+
+plt.imshow(cimg)
 #on passe à un seul channel
 cimg = mh.colors.rgb2grey(cimg)
 #on passe en binaire
@@ -765,7 +772,7 @@ plt.show()
 #détection des notes
 
 pc_note = 5*(e0-1)/4
-pc_blan = 3*e0
+pc_blan = 27
 pc_cro = e0
 
 #on enleve les barres ~horizontales possiblement restantes
@@ -794,7 +801,6 @@ v7 = existe_noire_img(img5,v6,e0)
 #cimg sert à détecter les croches, img2 sert à détecter les blanches
 v8 = existe_croche_blanche_mesure(cimg,img2,v7,e0)
 
-
 tracer_droite_liste(solprem,img1)
 tracer_droite_liste(solsec,img1)
 tracer_droite_liste(solter,img1)
@@ -802,7 +808,4 @@ tracer_droite_liste(solqua,img1)
 tracer_droite_liste(solcin,img1)
 
 plt.imshow(img3)
-plt.show()
-
-plt.imshow(img2)
 plt.show()
